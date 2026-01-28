@@ -1,0 +1,19 @@
+# Binary
+sops-to-vault
+
+# Test files
+*.sops.yaml
+*.sops.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
