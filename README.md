@@ -32,7 +32,7 @@ sops-to-vault [flags] <sops-file> <vault-path>
 | Flag | Env Var | Description |
 |------|---------|-------------|
 | `--vault-addr` | `VAULT_ADDR` | Vault server address |
-| `--vault-token` | `VAULT_TOKEN` | Vault authentication token |
+| `--vault-token` | `VAULT_TOKEN`, `VAULT_TOKEN_FILE` | Vault authentication token (or path to file containing token) |
 | `--mount` | - | KV v2 mount path (default: `secret`) |
 | `--dry-run` | - | Preview without writing to Vault |
 | `--append-name` | - | Append cleaned filename to vault path |

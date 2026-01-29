@@ -15,7 +15,7 @@ import (
 func main() {
 	var (
 		vaultAddr         = flag.String("vault-addr", "", "Vault server address (env: VAULT_ADDR)")
-		vaultToken        = flag.String("vault-token", "", "Vault token (env: VAULT_TOKEN)")
+		vaultToken        = flag.String("vault-token", "", "Vault token (env: VAULT_TOKEN, VAULT_TOKEN_FILE)")
 		mountPath         = flag.String("mount", "secret", "Vault KV v2 mount path")
 		dryRun            = flag.Bool("dry-run", false, "Print secrets without writing to Vault")
 		appendName        = flag.Bool("append-name", false, "Append cleaned filename to vault path")
@@ -54,7 +54,7 @@ func main() {
 
 	// Resolve config with precedence: flags > env vars
 	addr := resolveConfig(*vaultAddr, "VAULT_ADDR")
-	token := resolveConfig(*vaultToken, "VAULT_TOKEN")
+	token := resolveToken(*vaultToken)
 
 	// Validate required config (unless dry-run)
 	if !*dryRun {
@@ -63,7 +63,7 @@ func main() {
 			os.Exit(1)
 		}
 		if token == "" {
-			fmt.Fprintln(os.Stderr, "Error: Vault token required (--vault-token or VAULT_TOKEN)")
+			fmt.Fprintln(os.Stderr, "Error: Vault token required (--vault-token, VAULT_TOKEN, or VAULT_TOKEN_FILE)")
 			os.Exit(1)
 		}
 	}
@@ -147,6 +147,24 @@ func resolveConfig(flagVal, envVar string) string {
 		return flagVal
 	}
 	return os.Getenv(envVar)
+}
+
+func resolveToken(flagVal string) string {
+	if flagVal != "" {
+		return flagVal
+	}
+	if token := os.Getenv("VAULT_TOKEN"); token != "" {
+		return token
+	}
+	if tokenFile := os.Getenv("VAULT_TOKEN_FILE"); tokenFile != "" {
+		data, err := os.ReadFile(tokenFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to read VAULT_TOKEN_FILE %s: %v\n", tokenFile, err)
+			return ""
+		}
+		return strings.TrimSpace(string(data))
+	}
+	return ""
 }
 
 func printDryRun(path, mount string, data map[string]interface{}) {
